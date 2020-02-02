@@ -1,0 +1,90 @@
+#!/usr/bin/python
+"""
+
+,~~~@>
+ W~W'
+
+"""
+
+import sys
+import re
+
+hexLine=sys.argv[1]
+hexes=[]
+values=[]
+binaries=[]
+bit6=[]
+enascii=[]
+base64=""
+
+def separate(hline):
+  for i in range(len(hline)):
+    if i%2 == 0:
+      hexes.append(hline[i:i+2])
+
+def hex2dec(h):
+  nlist='0123456789abcdef'
+  for l in h:
+    num=0
+    findLet=re.findall("[0-9a-f]", l)
+    for n in nlist:
+      if findLet[1] == n:
+        num+=nlist.index(n)
+      if findLet[0] == n:
+        num+=nlist.index(n)*16
+    values.append(num)
+
+def dec2bin(d):
+  for n in d:
+    binary=""
+    i=7
+    while(i>=0):
+      if n<2**i:
+        binary+="0"
+      if n>=2**i:
+        binary+="1"
+        n-=2**i
+      i-=1
+    binaries.append(binary)
+
+def e2s(binary):
+  bit8=""
+  bits=""
+  for b in binary:
+    bit8+=b
+  for i in range(len(bit8)):
+    bits+=bit8[i]
+    if (i+1)%6==0:
+      bit6.append(bits)
+      bits=""
+    if i+1==len(bit8):
+      bit6.append(bits)
+ 
+  if len(bit6[len(bit6)-1])==0:
+    bit6.pop(len(bit6)-1)
+  while len(bit6[len(bit6)-1])!=6:
+    bit6[len(bit6)-1]+="0"
+
+def s2ascii(binary):
+  nlist="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+  num=0
+  for bit in binary:
+    for i in range(len(bit)):
+      if bit[i]=="1":
+        num+=2**abs(i-5)
+    enascii.append(nlist[num])
+    num=0
+
+separate(hexLine)
+hex2dec(hexes)
+dec2bin(values)
+e2s(binaries)
+s2ascii(bit6)
+
+while len(enascii)%4!=0:
+  enascii.append("=")
+
+for s in enascii:
+  base64+=s
+
+print(base64)
